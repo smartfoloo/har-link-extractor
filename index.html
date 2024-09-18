@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HAR Link Getter</title>
+  <link rel="stylesheet" href="style.css">
+  <script>
+    let i;
+    let data;
+    let linksList;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const harinput = document.getElementById("har-input");
+      const submitbutton = document.getElementById("submit-button");
+      const copyAllButton = document.getElementById("copy-all-button");
+      linksList = document.getElementById("links");
+
+      submitbutton.addEventListener("click", () => {
+        try {
+          data = JSON.parse(harinput.value);
+          linksList.innerHTML = "";
+
+          for (i = 0; i < data["log"]["entries"].length; i++) {
+            const url = data["log"]["entries"][i]["request"]["url"];
+            const link = document.createElement("li");
+            link.innerText = url;
+            linksList.appendChild(link);
+          }
+        } catch (error) {
+          console.error("Error parsing HAR data:", error);
+        }
+      });
+
+      copyAllButton.addEventListener("click", async () => {
+        const allLinks = linksList.querySelectorAll("li");
+        let textToCopy = "";
+
+        allLinks.forEach(link => {
+          textToCopy += link.innerText + "\n";
+        });
+
+        await navigator.clipboard.writeText(textToCopy);
+
+        copyAllButton.textContent = "Copied!";
+
+        setTimeout(() => {
+          copyAllButton.textContent = "Copy All";
+        }, 2000);
+      });
+
+      document.getElementById("disable").addEventListener("click", () => {
+        linksList.querySelectorAll("li").forEach(link => link.classList.add("disabled"));
+      });
+    });
+  </script>
+</head>
+
+<body>
+  <input type="text" id="har-input" />
+  <button id="submit-button">Submit</button>
+  <button id="copy-all-button">Copy All</button>
+  <br />
+  <ul id="links"></ul>
+</body>
+
+</html>
